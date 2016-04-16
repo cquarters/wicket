@@ -22,6 +22,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.IMarkupFragment;
 import org.apache.wicket.markup.MarkupException;
 import org.apache.wicket.markup.MarkupStream;
 import org.apache.wicket.markup.html.TransparentWebMarkupContainer;
@@ -133,7 +134,11 @@ public class Enclosure extends WebMarkupContainer implements IComponentResolver
 		if (childComponent == null)
 		{
 			// try to find child when resolved
-			childComponent = getChildComponent(new MarkupStream(getMarkup()), getEnclosureParent());
+		  IMarkupFragment markup = getMarkup();
+      if( markup != null )
+      {
+        childComponent = getChildComponent(new MarkupStream(markup), getEnclosureParent());
+      }
 		}
 		return childComponent;
 	}
@@ -166,19 +171,17 @@ public class Enclosure extends WebMarkupContainer implements IComponentResolver
 	}
 
 	@Override
-	public boolean isVisible()
-	{
-		return getChild().determineVisibility();
-	}
-	
-	@Override
 	protected void onConfigure()
 	{
 		super.onConfigure();
 		final Component child = getChild();
 		
-		child.configure();
-		boolean childVisible = child.determineVisibility();
+    boolean childVisible = false;
+    if( child != null )
+    {
+      child.configure();
+      childVisible = child.determineVisibility();
+    }
 		
 		setVisible(childVisible);
 	}
